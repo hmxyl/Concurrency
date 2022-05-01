@@ -1,0 +1,9 @@
+**/.idea
+**/target/
+**/.mvn/
+
+### IntelliJ IDEA ###
+**/out
+*.iws
+*.log
+*.ipr
