@@ -14,7 +14,7 @@ public class AtomicIntegerFieldUpdaterTest {
     }
 
     class TestBean {
-       private  volatile int param;
+        volatile int param;
     }
 }
 
