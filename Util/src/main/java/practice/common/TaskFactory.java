@@ -1,4 +1,4 @@
-package hots.common;
+package practice.common;
 
 import java.util.concurrent.TimeUnit;
 
@@ -17,8 +17,8 @@ public final class TaskFactory {
      * @param timeUnit
      * @return
      */
-    public static boolean doAction(long time, TimeUnit timeUnit) {
-        return doAction(time, timeUnit, false);
+    public static boolean spend(long time, TimeUnit timeUnit) {
+        return spend(time, timeUnit, false);
     }
 
     /**
@@ -28,7 +28,7 @@ public final class TaskFactory {
      * @param timeUnit
      * @return
      */
-    public static boolean doAction(long time, TimeUnit timeUnit, boolean logAction) {
+    public static boolean spend(long time, TimeUnit timeUnit, boolean logAction) {
         try {
             if (logAction) {
                 System.out.printf("%s start task（%s）\n", Thread.currentThread().getName(), System.currentTimeMillis());
