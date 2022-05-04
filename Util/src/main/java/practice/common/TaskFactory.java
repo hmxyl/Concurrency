@@ -9,6 +9,10 @@ import java.util.concurrent.TimeUnit;
  */
 public final class TaskFactory {
 
+    public static boolean spendSeconds(long time) {
+        return spend(time, TimeUnit.SECONDS, false, false);
+    }
+
 
     /**
      * 执行任务，不打印线程名称
@@ -18,7 +22,18 @@ public final class TaskFactory {
      * @return
      */
     public static boolean spend(long time, TimeUnit timeUnit) {
-        return spend(time, timeUnit, false);
+        return spend(time, timeUnit, false, false);
+    }
+
+    /**
+     * 执行任务，打印线程结束
+     *
+     * @param time
+     * @param timeUnit
+     * @return
+     */
+    public static boolean spend(long time, TimeUnit timeUnit, boolean logActionFinish) {
+        return spend(time, timeUnit, false, logActionFinish);
     }
 
     /**
@@ -28,16 +43,17 @@ public final class TaskFactory {
      * @param timeUnit
      * @return
      */
-    public static boolean spend(long time, TimeUnit timeUnit, boolean logAction) {
+    public static boolean spend(long time, TimeUnit timeUnit, boolean logActionBegin, boolean logActionFinish) {
         try {
-            if (logAction) {
+            if (logActionBegin) {
                 System.out.printf("%s start task（%s）\n", Thread.currentThread().getName(), System.currentTimeMillis());
             }
 
             timeUnit.sleep(time);
 
-            if (logAction) {
-                System.out.printf("%s finnish task（%s）\n", Thread.currentThread().getName(), System.currentTimeMillis());
+            if (logActionFinish) {
+                System.out.printf("%s finnish task（%s）\n", Thread.currentThread().getName(),
+                        System.currentTimeMillis());
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
