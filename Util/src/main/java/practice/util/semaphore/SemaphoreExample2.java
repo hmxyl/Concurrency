@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
  * @date: 2022/5/6
  * @desc:
  */
-public class SemaphoreExample {
+public class SemaphoreExample2 {
     public static void main(String[] args) {
         final Semaphore semaphore = new Semaphore(1);
         new Thread(new TaskRunnable(semaphore), "T1").start();
@@ -27,11 +27,9 @@ public class SemaphoreExample {
             try {
                 // 请求执行许可证
                 System.out.println(Thread.currentThread().getName() +  " ask for permits");
-                semaphore.acquire();
-                System.out.println(Thread.currentThread().getName() +  " got permits");
-                TaskFactory.spend(10, TimeUnit.SECONDS, true);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                boolean tryResult = semaphore.tryAcquire();
+                System.out.println(Thread.currentThread().getName() +  (tryResult ? " got permits" : " ignore permits and continue"));
+                TaskFactory.spend(2, TimeUnit.SECONDS, true);
             } finally {
                 // 释放许可证
                 semaphore.release();
