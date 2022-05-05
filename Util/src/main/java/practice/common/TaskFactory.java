@@ -13,7 +13,6 @@ public final class TaskFactory {
         return spend(time, TimeUnit.SECONDS, false, false);
     }
 
-
     /**
      * 执行任务，不打印线程名称
      *
@@ -46,13 +45,13 @@ public final class TaskFactory {
     public static boolean spend(long time, TimeUnit timeUnit, boolean logActionBegin, boolean logActionFinish) {
         try {
             if (logActionBegin) {
-                System.out.printf("%s start task（%s）\n", Thread.currentThread().getName(), System.currentTimeMillis());
+                System.out.printf("%s start task [%s]\n", Thread.currentThread().getName(), System.currentTimeMillis());
             }
 
             timeUnit.sleep(time);
 
             if (logActionFinish) {
-                System.out.printf("%s finnish task（%s）\n", Thread.currentThread().getName(),
+                System.out.printf("%s finnish task [%s]\n", Thread.currentThread().getName(),
                         System.currentTimeMillis());
             }
         } catch (InterruptedException e) {
