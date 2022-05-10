@@ -16,11 +16,11 @@ public class CyclicBarrierExample2 {
         new Thread(new ActionRunnable(barrier), "T1").start();
         new Thread(new ActionRunnable(barrier), "T2").start();
 
-        TaskFactory.spendSeconds(6);
+        TaskFactory.spend(6, TimeUnit.SECONDS);
         System.out.println(barrier.getNumberWaiting());
 
         barrier.reset();
-        TaskFactory.spendSeconds(2);
+        TaskFactory.spend(2, TimeUnit.SECONDS);
         System.out.println(barrier.getNumberWaiting());
     }
 
@@ -34,7 +34,7 @@ public class CyclicBarrierExample2 {
         @Override
         public void run() {
             try {
-                TaskFactory.spend(ThreadLocalRandom.current().nextInt(5), TimeUnit.SECONDS, false, true);
+                TaskFactory.spend(ThreadLocalRandom.current().nextInt(5), TimeUnit.SECONDS, true);
                 barrier.await();
                 System.out.println(Thread.currentThread().getName() + "- await finished");
             } catch (InterruptedException e) {

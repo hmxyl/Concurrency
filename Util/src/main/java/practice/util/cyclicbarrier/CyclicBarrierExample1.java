@@ -29,7 +29,7 @@ public class CyclicBarrierExample1 {
         @Override
         public void run() {
             try {
-                TaskFactory.spend(ThreadLocalRandom.current().nextInt(5), TimeUnit.SECONDS, false, true);
+                TaskFactory.spend(ThreadLocalRandom.current().nextInt(5), TimeUnit.SECONDS, true);
                 barrier.await();
                 System.out.println(Thread.currentThread().getName() + "- await finished");
             } catch (InterruptedException e) {
