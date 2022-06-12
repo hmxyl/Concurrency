@@ -21,10 +21,20 @@ public class ConditionExample {
     private static volatile boolean used = true;
 
     public static void main(String[] args) {
+        new Thread(() -> {
+            while (true) {
+                buildData();
+            }
+        }).start();
 
+        new Thread(() -> {
+            while (true) {
+                useData();
+            }
+        }).start();
     }
 
-    private void buildData() {
+    private static void buildData() {
         try {
             lock.lock();
             while (used) {
@@ -43,7 +53,7 @@ public class ConditionExample {
         }
     }
 
-    private void useData() {
+    private static void useData() {
         try {
             lock.lock();
             while (!used) {
