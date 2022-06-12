@@ -1,4 +1,4 @@
-package practice.util.lock;
+package practice.util.lock.readwrite;
 
 import practice.common.TaskFactory;
 

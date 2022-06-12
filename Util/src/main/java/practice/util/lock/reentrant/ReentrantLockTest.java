@@ -1,4 +1,4 @@
-package practice.util.lock;
+package practice.util.lock.reentrant;
 
 import practice.common.TaskFactory;
 
