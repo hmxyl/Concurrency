@@ -2,7 +2,8 @@ package practice.util.lock.stamp;
 
 import practice.common.TaskFactory;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -12,6 +13,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
+ * 悲观读锁+写锁
  * @author: DH
  * @date: 2022/6/12
  * @desc:
@@ -20,7 +22,7 @@ public class StampedLockTest {
 
     private static final StampedLock STAMPED_LOCK = new StampedLock();
 
-    private static final LinkedList<Long> DATA = new LinkedList<>();
+    private static final List<Long> DATA = new ArrayList<>();
 
     public static void main(String[] args) {
         final ExecutorService executorService = Executors.newFixedThreadPool(10);
@@ -44,11 +46,10 @@ public class StampedLockTest {
         });
     }
 
-    public static void read() {
-        long stamp = -1;
+    private static void read() {
+        long stamp = STAMPED_LOCK.readLock();
         try {
             // 获取锁，并获取时间戳
-            stamp = STAMPED_LOCK.readLock();
             Optional.of(DATA.stream().map(String::valueOf).collect(Collectors.joining("、", "R-", "")))
                     .ifPresent(System.out::println);
 
@@ -59,12 +60,13 @@ public class StampedLockTest {
         }
     }
 
-    public static void write() {
+    private static void write() {
         long stamp = -1;
         try {
             stamp = STAMPED_LOCK.writeLock();
+            TaskFactory.spend(1, TimeUnit.SECONDS);
             long value = System.currentTimeMillis();
-            DATA.addLast(value);
+            DATA.add(value);
             System.out.println("C:" + value);
         } finally {
             STAMPED_LOCK.unlockWrite(stamp);

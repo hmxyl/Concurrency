@@ -33,7 +33,4 @@ public class TaskFactory {
             e.printStackTrace();
         }
     }
-
-    public static void log(Object...objects){
-    }
 }

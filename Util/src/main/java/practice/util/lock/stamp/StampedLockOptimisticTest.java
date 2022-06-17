@@ -2,7 +2,8 @@ package practice.util.lock.stamp;
 
 import practice.common.TaskFactory;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -12,19 +13,28 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
- * @author: DH
- * @date: 2022/6/12
- * @desc:
+ * 乐观读，需要遵循必须遵循以下模式
+ *<p>
+ *   long stamp = lock.tryOptimisticRead();  // 非阻塞获取版本信息
+ *   copyVaraibale2ThreadMemory();           // 拷贝变量到线程本地堆栈
+ *   if(!lock.validate(stamp)){              // 校验
+ *       long stamp = lock.readLock();       // 获取读锁
+ *       try {
+ *           copyVaraibale2ThreadMemory();   // 拷贝变量到线程本地堆栈
+ *        } finally {
+ *          lock.unlock(stamp);              // 释放悲观锁
+ *       }
+ *   }
+ *   useThreadMemoryVarables();              // 使用线程本地堆栈里面的数据进行操作
+ *</p>
  */
 public class StampedLockOptimisticTest {
+    private static final StampedLock stampedLock = new StampedLock();
 
-    private static final StampedLock STAMPED_LOCK = new StampedLock();
-
-    private static final LinkedList<Long> DATA = new LinkedList<>();
+    private static final List<Long> DATA = new ArrayList<>();
 
     public static void main(String[] args) {
         final ExecutorService executorService = Executors.newFixedThreadPool(10);
-
         IntStream.rangeClosed(1, 10).forEach(index -> {
             if (index % 8 == 0) {
                 // 写数据
@@ -37,40 +47,47 @@ public class StampedLockOptimisticTest {
                 // 读数据
                 executorService.submit(() -> {
                     while (true) {
-                        read();
+                        optimisticRead();
                     }
                 });
             }
         });
     }
 
-    public static void read() {
+    public static void optimisticRead() {
         // 获取锁，并获取时间戳
-        long stamp = STAMPED_LOCK.tryOptimisticRead();
-        // 验证时间戳过期
-        if (STAMPED_LOCK.validate(stamp)) {
+        long stamp = stampedLock.tryOptimisticRead();
+        // 乐观读，必须先拷贝一份数据到在方法中
+        List<Long> local = new ArrayList<>();
+        local.addAll(DATA);
+        // 检查在拷贝过程中有没有排他锁抢占，如果有则悲观读
+        if (!stampedLock.validate(stamp)) {
+            stamp = stampedLock.readLock();
             try {
-                stamp = STAMPED_LOCK.readLock();
-                Optional.of(DATA.stream().map(String::valueOf).collect(Collectors.joining("、", "R-", "")))
-                        .ifPresent(System.out::println);
-                TaskFactory.spend(1, TimeUnit.SECONDS);
+                System.out.println(">>>>>>>> 重新读取数据到本地 >>>>>>>>");
+                local.clear();
+                local.addAll(DATA);
             } finally {
-                STAMPED_LOCK.unlockRead(stamp);
+                stampedLock.unlockRead(stamp);
             }
-        } else {
-            System.err.println(stamp);
         }
+
+        // 使用数据
+        Optional.of(local.stream().map(String::valueOf).collect(Collectors.joining("、", "R-", "")))
+                .ifPresent(System.out::println);
+        TaskFactory.spend(1, TimeUnit.SECONDS);
     }
 
     public static void write() {
-        long stamp = -1;
+        long stamp = stampedLock.writeLock();
         try {
-            stamp = STAMPED_LOCK.writeLock();
             long value = System.currentTimeMillis();
-            DATA.addLast(value);
-            System.out.println("C:" + value);
+            System.out.println("W-" + value);
+            System.out.println();
+            DATA.add(value);
         } finally {
-            STAMPED_LOCK.unlockWrite(stamp);
+            stampedLock.unlockWrite(stamp);
         }
+
     }
 }
